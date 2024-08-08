@@ -1,0 +1,104 @@
+#!/bin/ksh
+
+current_year=$(date +"%Y")
+
+if [ ! $# -eq 3 ]
+        then
+        echo "Error 3 arguments required"
+        echo "Usage: Sep 12 1996"
+        exit 3
+fi
+
+        month=$1
+        day=$2
+        year=$3
+
+if [ $year -ge 1920 ] && [ $year -le $current_year ]
+        then
+        if [ $(($year % 4)) -eq 0 ]
+                then
+                leap_year=1
+        else
+                leap_year=0
+        fi
+        else
+                echo "$year is not a valid year"
+                exit 13
+fi
+
+case $month in
+        Jan) month_number=1 ;;
+        Feb) month_number=2 ;;
+        Mar) month_number=3 ;;
+        Apr) month_number=4 ;;
+        May) month_number=5 ;;
+        Jun) month_number=6 ;;
+        Jul) month_number=7 ;;
+        Aug) month_number=8 ;;
+        Sep) month_number=9 ;;
+        Oct) month_number=10 ;;
+        Nov) month_number=11 ;;
+        Dec) month_number=12 ;;
+        *)
+                echo "Error: $month needs to be 3 letter abbreviation with the first letter uppercased."
+                exit 11
+                ;;
+esac
+
+valid=0
+
+if [ $month_number -eq 9 ] || [ $month_number -eq 4 ] || [ $month_number -eq 6 ] || [ $month_number -eq 11 ]; then
+                if [ $day -gt 0 ] && [ $day -le 30 ]; then
+                valid=1
+                fi
+elif [ $month_number -eq 1 ] || [ $month_number -eq 3 ] || [ $month_number -eq 5 ] || [ $month_number -eq 7 ] [ $month_number -eq 8 ] || [ $month_number -eq 10 ] || [ $month_number -eq 12 ]; then
+                if [ $day -gt 0 ] && [ $day -le 31 ]; then
+                valid=1
+                fi
+else
+        if [ $leap_year -eq 0 ]; then
+                if [ $day -gt 0 ] && [ $day -le 28 ]; then
+                valid=1
+                fi
+        else
+                if [ $day -gt 0 ] && [ $day -le 29 ]; then
+                valid=1
+                fi
+        fi
+fi
+
+if [ $valid -eq 0 ]; then
+        echo "Error: invalid day entered for $month"
+        exit 12
+fi
+
+#start of new math
+days=0
+for (( y=1920; y < $year; y++ )); do
+        if (( y % 4 == 0 )); then
+                let days+=366
+        else
+                let days+=365
+        fi
+done
+
+month_days=0
+for (( m=1; m<$month_number; m++ )); do
+        if (( $m == 9 || $m == 4 || $m == 6 || $m == 11 )); then
+        let month_days+=30
+elif (( $m == 1  || $m == 3 || $m == 5 || $m == 7 || $m == 8 || $m == 10 || $m == 12 )); then
+        let month_days+=31
+elif (( $m == 2 )); then
+            if (( $leap_year == 0 )); then
+            let month_days+=28
+        else
+            let month_days+=29
+        fi
+    fi
+done
+
+let days+=month_days+day-1
+
+echo "$days days passed since Jan 1, 1920"
+
+exit 0
